@@ -224,14 +224,12 @@ void browseDir(StringTabs *analyzedFiles, char *currDirectory, StringTabs *exclu
 
     while((d_res = readdir(dir)) != NULL) {
         if(isValidCFile(d_res->d_name, excludedFiles)) {
-            addString(analyzedFiles, d_res->d_name);
+            getPath(currDirectory, d_res->d_name, temp);
+            addString(analyzedFiles, temp);
             printf("Fichier C : %s\n", d_res->d_name);
         } else if(recursive == 1 && isDir(d_res->d_name)) {
             if(d_res->d_name[0] != '.') {
-                strcpy(temp, currDirectory);
-                strcat(temp, "/");
-                strcat(temp, d_res->d_name);
-                temp[strlen(temp)] = '\0';
+                getPath(currDirectory, d_res->d_name, temp);
                 test = opendir(temp);
                 if(test == NULL) {
                     printf("%s is not a directory\n", d_res->d_name);
@@ -318,4 +316,11 @@ int isDir(char *s) {
     }
     printf("%s est un dossier\n", s);
     return 1;
+}
+
+void getPath(char *path, char *fileName, char *target) {
+    strcpy(target, path);
+    strcat(target, "/");
+    strcat(target, fileName);
+    target[strlen(target)] = '\0';
 }

@@ -44,3 +44,6 @@ int isValidCFile(char*, StringTabs*);
 
 // Vérifie si la chaine est un répertoire
 int isDir(char*);
+
+// Concatène le chemin d'accès et le nom du fichier pour soit le stocker, soit ouvrir un nouveau dossier
+void getPath(char*, char*, char*);

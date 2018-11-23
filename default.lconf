@@ -10,7 +10,7 @@ main.lconf
 =excludedFiles
 - bonjour.c
 - test.c
-- konichouwah.c
+- hello.c
 
 =recursive
 false

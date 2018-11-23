@@ -4,8 +4,8 @@ NONE
 =rules
 - array-bracket-eol : on
 - regle-test : off
-- hunterxhunter : on
-- prout : beurk
+- unused-function : on
+- max-lines-number : 42
 
 =excludedFiles
 - bonjour.c

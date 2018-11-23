@@ -8,6 +8,7 @@
 int main(int argc, char **argv) {
     int recursive; // Entier qui va indiquer si Linter va s'executer en recursif ou non
     char *filename = malloc(sizeof(char) * 100);
+    int i;
 
     StringTabs *rules = malloc(sizeof(StringTabs)); // Tableau de chaines de caractères contenant les noms des règles et leur valeur
     StringTabs *excludedFiles = malloc(sizeof(StringTabs)); // Tableau de chaines de caractères contenant les noms des fichiers à ne pas vérifier
@@ -24,6 +25,12 @@ int main(int argc, char **argv) {
     // Fonction récupérant les fichiers à analyser
     browseDir(analyzedFiles, "analyse", excludedFiles, recursive);
     // Pour chaque fichier, lancer les règles
+
+    system("pause");
+    system("cls");
+    for(i = 0; i < analyzedFiles->size; i++) {
+        printf("%s\n", analyzedFiles->tab[i]);
+    }
 
     freeTabs(rules);
     freeTabs(excludedFiles);

@@ -22,24 +22,25 @@
 	<stdio.h>
 	"struct.h"
 
-1542815551 source:c:\users\corentin\desktop\esgi\année 3-2\semestre 1\langage c\projet - linterc\linterc\main.c
+1542986971 source:c:\users\corentin\desktop\esgi\année 3-2\semestre 1\langage c\projet - linterc\linterc\main.c
 	<stdio.h>
 	<stdlib.h>
 	<string.h>
 	<windows.h>
 	"functions.h"
 
-1542816852 c:\users\corentin\desktop\esgi\année 3-2\semestre 1\langage c\projet - linterc\linterc\functions.h
+1542987384 c:\users\corentin\desktop\esgi\année 3-2\semestre 1\langage c\projet - linterc\linterc\functions.h
 	<stdio.h>
 	"struct.h"
 
-1541946641 source:c:\users\corentin\desktop\esgi\année 3-2\semestre 1\langage c\projet - linterc\linterc\functions.c
+1542816953 source:c:\users\corentin\desktop\esgi\année 3-2\semestre 1\langage c\projet - linterc\linterc\functions.c
 	<stdio.h>
 	<stdlib.h>
 	<string.h>
 	<windows.h>
 	<dirent.h>
 	<sys/types.h>
+	<errno.h>
 	"functions.h"
 
 1541947564 c:\users\corentin\desktop\esgi\année 3-2\semestre 1\langage c\projet - linterc\linterc\struct.h
