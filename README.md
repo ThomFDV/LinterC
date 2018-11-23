@@ -1,0 +1,2 @@
+# LinterC
+Projet de C.
