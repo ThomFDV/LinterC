@@ -1,5 +1,6 @@
 # LinterC
 Projet de C.
+On va tout casser !
 
 ### Rappel commandes git
 
