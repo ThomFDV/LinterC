@@ -1,0 +1,14 @@
+=extends
+NONE
+
+=rules
+- array-bracket-eol : off
+- regle-test : off
+- hunterxhunter : on
+- prout : beurk
+
+=excludedFiles
+- bonjour.c
+
+=recursive
+false

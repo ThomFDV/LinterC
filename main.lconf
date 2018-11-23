@@ -1,0 +1,17 @@
+=extends
+NONE
+
+=rules
+- array-bracket-eol : on
+- regle-test : off
+- hunterxhunter : on
+- prout : beurk
+
+=excludedFiles
+- bonjour.c
+- bye.c
+- salut.c
+- undernier.c
+
+=recursive
+false

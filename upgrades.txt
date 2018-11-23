@@ -1,0 +1,5 @@
+- Ajouter une structure Rules qui comprend le tableau de règles, sa taille max et sa taille actuelle
+
+- Pareil pour excludedFiles
+
+- Pourquoi pas une même structure ?

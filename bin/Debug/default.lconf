@@ -1,0 +1,14 @@
+=extends
+main.lconf
+
+=rules
+- array-bracket-eol : off
+- operator-spacing : off
+- comma-spacing : on
+- indent : n
+
+=excludedFiles
+- bonjour.c
+
+=recursive
+false

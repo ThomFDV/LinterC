@@ -1,0 +1,47 @@
+# depslib dependency file v1.0
+1540499982 source:c:\users\corentin\desktop\esgi\année 3-2\langage c\projet - linterc\linterc\main.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<windows.h>
+	"functions.h"
+
+1540501042 source:c:\users\corentin\desktop\esgi\année 3-2\langage c\projet - linterc\linterc\functions.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	"functions.h"
+
+1540501197 source:c:\users\corentin\desktop\esgi\année 3-2\langage c\projet - linterc\linterc\functions.h
+	<stdio.h>
+
+1540501197 c:\users\corentin\desktop\esgi\année 3-2\langage c\projet - linterc\linterc\functions.h
+	<stdio.h>
+
+1542816852 source:c:\users\corentin\desktop\esgi\année 3-2\semestre 1\langage c\projet - linterc\linterc\functions.h
+	<stdio.h>
+	"struct.h"
+
+1542815551 source:c:\users\corentin\desktop\esgi\année 3-2\semestre 1\langage c\projet - linterc\linterc\main.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<windows.h>
+	"functions.h"
+
+1542816852 c:\users\corentin\desktop\esgi\année 3-2\semestre 1\langage c\projet - linterc\linterc\functions.h
+	<stdio.h>
+	"struct.h"
+
+1541946641 source:c:\users\corentin\desktop\esgi\année 3-2\semestre 1\langage c\projet - linterc\linterc\functions.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<windows.h>
+	<dirent.h>
+	<sys/types.h>
+	"functions.h"
+
+1541947564 c:\users\corentin\desktop\esgi\année 3-2\semestre 1\langage c\projet - linterc\linterc\struct.h
+	<stdio.h>
+
