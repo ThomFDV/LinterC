@@ -46,3 +46,31 @@
 1541947564 c:\users\corentin\desktop\esgi\année 3-2\semestre 1\langage c\projet - linterc\linterc\struct.h
 	<stdio.h>
 
+1542987479 source:c:\users\corentin\desktop\esgi\année 3-2\semestre 1\langage c\projet - linterc\repo\linterc\functions.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<windows.h>
+	<dirent.h>
+	<sys/types.h>
+	<errno.h>
+	"functions.h"
+
+1543163955 c:\users\corentin\desktop\esgi\année 3-2\semestre 1\langage c\projet - linterc\repo\linterc\functions.h
+	<stdio.h>
+	"struct.h"
+
+1541947564 c:\users\corentin\desktop\esgi\année 3-2\semestre 1\langage c\projet - linterc\repo\linterc\struct.h
+	<stdio.h>
+
+1543163995 source:c:\users\corentin\desktop\esgi\année 3-2\semestre 1\langage c\projet - linterc\repo\linterc\main.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<windows.h>
+	"functions.h"
+
+1543163955 source:c:\users\corentin\desktop\esgi\année 3-2\semestre 1\langage c\projet - linterc\repo\linterc\functions.h
+	<stdio.h>
+	"struct.h"
+

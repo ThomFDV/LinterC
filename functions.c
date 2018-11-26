@@ -39,7 +39,7 @@ int parseConf(StringTabs *rules, StringTabs *excludedFiles, char *filename) {
                 if(!strcmp(key, "extends")) {
                     ext = parseExtends(f);
                     if(ext == NULL) {
-                        printf("Pas d'extends\n", ext);
+                        printf("Pas d'extends\n");
                     } else {
                         printf("Ouverture du fichier %s\n", ext);
                         rec = parseConf(rules, excludedFiles, ext);
@@ -212,7 +212,7 @@ void browseDir(StringTabs *analyzedFiles, char *currDirectory, StringTabs *exclu
     DIR *test;
     struct dirent *d_res;
     // DEBUG int i;
-    recursive = 1;
+    recursive = 1; // DEBUG
 
     if(dir == NULL) {
         printf("Pas ouvert\n");
@@ -253,7 +253,8 @@ void browseDir(StringTabs *analyzedFiles, char *currDirectory, StringTabs *exclu
 }
 
 // Initialise une instance de StringTabs
-void initTabs(StringTabs *t, int size) {
+StringTabs *initTabs(int size) {
+    StringTabs *t = malloc(sizeof(StringTabs));
     int i;
     t->maxSize = size;
     t->tab = malloc(sizeof(char*) * t->maxSize);
@@ -261,6 +262,7 @@ void initTabs(StringTabs *t, int size) {
         t->tab[i] = malloc(sizeof(char) * 60);
     }
     t->size = 0;
+    return t;
 }
 
 // Libère la place occupée en mémoire par une instance de StringTabs
@@ -314,7 +316,6 @@ int isDir(char *s) {
             return 0;
         }
     }
-    printf("%s est un dossier\n", s);
     return 1;
 }
 
@@ -324,3 +325,24 @@ void getPath(char *path, char *fileName, char *target) {
     strcat(target, fileName);
     target[strlen(target)] = '\0';
 }
+
+/*
+    PT1
+    Première étape : vérifier que les règles existent.
+    Pour ça, ça serait bien de faire une sous-fonction "check_si_regle_existe"
+    Ensuite il faut regarder si la valeur affectée à la règle est valide :
+        - Si elle est à off on la lance pas
+        - Si elle est à on, on la lance seulement si la fonction a pas besoin d'argument
+        - Si c'est autre chose, on vérifie que le type de la valeur correspond bien au type de paramètre attendu,
+          et donc si c'est bon on la lance (en convertissant si besoin la valeur qui sera une chaine de caractère
+          en int par exemple), sinon on lance pas
+    Du coup ça donnerait quelque chose comme ça :
+    Pour chaque règle :
+    if(check_si_regle_existe(nom_regle)) {
+        if(check_si_valeur_ok(nom_regle, valeur_regle) {
+            for(i = 0; i < strlen(analyzedFiles->size); i++) {
+
+            }
+        }
+    }
+*/

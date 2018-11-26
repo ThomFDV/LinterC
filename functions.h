@@ -28,7 +28,7 @@ void addExcludedFile(char*, StringTabs*);
 void browseDir(StringTabs*, char*, StringTabs*, int);
 
 // Initialise les tableaux de chaines de caractères
-void initTabs(StringTabs*, int);
+StringTabs *initTabs(int);
 
 // Libère l'espace alloué aux tableaux de chaines de caractères
 void freeTabs(StringTabs*);
@@ -47,3 +47,8 @@ int isDir(char*);
 
 // Concatène le chemin d'accès et le nom du fichier pour soit le stocker, soit ouvrir un nouveau dossier
 void getPath(char*, char*, char*);
+
+/*
+    PT1
+    Le prototype ça serait : void nom_fonction(StringTabs*, StringTabs*);
+*/

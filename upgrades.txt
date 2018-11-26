@@ -1,5 +1,4 @@
-- Ajouter une structure Rules qui comprend le tableau de règles, sa taille max et sa taille actuelle
+- fonction permettant de parcourir une fonction
 
-- Pareil pour excludedFiles
+- structure disant à quel niveau la variable est instanciée, pareil pour les fonctions
 
-- Pourquoi pas une même structure ?
