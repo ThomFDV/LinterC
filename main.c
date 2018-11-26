@@ -4,6 +4,7 @@
 #include <windows.h>
 
 #include "functions.h"
+#include "parcours.h"
 
 int main(int argc, char **argv) {
     int recursive; // Entier qui va indiquer si Linter va s'executer en recursif ou non
