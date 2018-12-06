@@ -30,6 +30,10 @@ int main(int argc, char **argv) {
         La fonction ressemblera à un truc du genre du coup :
         nom_fonction(rules, analyzedFiles);
     */
+    //check_if_rules_exist(rules);
+    system("pause");
+    system("cls");
+    exec_rules(rules, analyzedFiles);
 
     system("pause");
     system("cls");

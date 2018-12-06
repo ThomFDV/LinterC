@@ -83,3 +83,35 @@
 1543271063 c:\users\corentin\desktop\esgi\année 3-2\semestre 1\langage c\projet - linterc\repo\linterc\parcours.h
 	<stdio.h>
 
+1544106358 source:c:\users\e2854663\documents\c_ecole\langage c\linterc\functions.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<windows.h>
+	<dirent.h>
+	<sys/types.h>
+	<errno.h>
+	"functions.h"
+
+1544090356 c:\users\e2854663\documents\c_ecole\langage c\linterc\functions.h
+	<stdio.h>
+	"struct.h"
+
+1543307365 c:\users\e2854663\documents\c_ecole\langage c\linterc\struct.h
+	<stdio.h>
+
+1544090356 source:c:\users\e2854663\documents\c_ecole\langage c\linterc\functions.h
+	<stdio.h>
+	"struct.h"
+
+1544012641 source:c:\users\e2854663\documents\c_ecole\langage c\linterc\main.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<windows.h>
+	"functions.h"
+	"parcours.h"
+
+1543307365 c:\users\e2854663\documents\c_ecole\langage c\linterc\parcours.h
+	<stdio.h>
+

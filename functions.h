@@ -52,3 +52,32 @@ void getPath(char*, char*, char*);
     PT1
     Le prototype ça serait : void nom_fonction(StringTabs*, StringTabs*);
 */
+
+// Vérifie si la regle en parametre existe.// Retourne 1 si elle existe et que sa valeur sera n|off,// retourne 2 si elle existe et que sa valeur sera on|off,// retourne 0 si elle n'existe pas ou si elle est mal ecrite.
+int check_if_rules_exist(char*);
+
+// Recupere le chiffre en char*, retourne le chiffre converti en int
+int recup_number_of_rule(int, char*);
+
+// Recupere la valeur (on ou off) en char*
+int recup_value_of_rule(int, char*);
+
+// Execute les regles si elles sont "on" ou si "n" > 0
+void exec_rules(StringTabs*, StringTabs*);
+
+/* ************************************************************************************************************************* */
+/*                                                          RULES                                                            */
+/* ************************************************************************************************************************* */
+
+// L’accolade doit se trouver en fin de ligne pour les fonctions, if, boucles,
+void array_bracket_eol(char*);
+
+// Il doit avoir un espace à droite d’une virgule.
+void comma_spacing(char*);
+
+// Test la présence d’un commentaire multi-ligne en entête de fichier.
+void comments_header(char*);
+
+// Les fichiers ne doivent pas dépasser n lignes.
+void max_file_line_numbers(char*, int);
+

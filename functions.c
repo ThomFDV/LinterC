@@ -326,6 +326,300 @@ void getPath(char *path, char *fileName, char *target) {
     target[strlen(target)] = '\0';
 }
 
+// Vérifie si la regle en parametre existe.
+// Retourne 1 si elle existe et que sa valeur sera n|off,
+// retourne 2 si elle existe et que sa valeur sera on|off,
+// retourne 0 si elle n'existe pas ou si elle est mal ecrite.
+int check_if_rules_exist(char *rule) {
+
+    int exist = -1;
+    StringTabs *rulesTest = initTabs(16);
+    rulesTest->tab[0] = "array-bracket-eol";
+    rulesTest->tab[1] = "operators-spacing";
+    rulesTest->tab[2] = "comma-spacing";
+    rulesTest->tab[3] = "indent";
+    rulesTest->tab[4] = "comments-header";
+    rulesTest->tab[5] = "max-line-numbers";
+    rulesTest->tab[6] = "max-file-line-numbers";
+    rulesTest->tab[7] = "no-trailing-spaces";
+    rulesTest->tab[8] = "no-multi-declaration";
+    rulesTest->tab[9] = "unused-variable";
+    rulesTest->tab[10] = "undeclared-variable";
+    rulesTest->tab[11] = "no-prototype";
+    rulesTest->tab[12] = "unused-function";
+    rulesTest->tab[13] = "undeclared-function";
+    rulesTest->tab[14] = "variable-assignment-type";
+    rulesTest->tab[15] = "function-parameters-type";
+
+    for (int i = 0; i < 16; i++) {
+
+        if (strstr(rule, rulesTest->tab[i]) != NULL) {
+
+            exist = i;
+            break;
+        }
+    }
+    return exist;
+}
+
+// Recupere le chiffre en char*, retourne le chiffre converti en int
+int recup_number_of_rule(int numDepart, char *rule) {
+    int n = -1;
+    int m = 0;
+//    int autre = 0;
+    int chiffre = 0;
+    char* num = malloc(sizeof(char)*4);
+
+    for (int k = numDepart; k < strlen(rule); k++) {
+
+        if (((rule[k] > 47) && (rule[k] < 58)) && ((chiffre == 1) || (m == 0))) { // si c'est un chiffre
+            num[m] = rule[k];
+            m++;
+            chiffre = 1;
+        }
+        else if (((rule[k] < 48) || (rule[k] > 57)) && (chiffre == 1)) { // si ce n'est pas un chiffre mais qu'il y en avait un avant
+            chiffre = 0;
+        }
+        else if ((rule[k] > 32) && (chiffre == 0) && (m > 0)) { // si c'est n'importe quel caractere et qu'il y avait un chiffre avant mais pas directement
+            m = 0;
+            break;
+        }
+        else if (rule[k] > 32){ // si ce n'est pas un espace
+            m = 0;
+            break;
+        }
+    }
+    if (m == 4) {
+        n = ((int)num[0]-48)*1000;
+        n += ((int)num[1]-48)*100;
+        n += ((int)num[2]-48)*10;
+        n += ((int)num[3]-48);
+    }
+    if (m == 3) {
+        n = ((int)num[0]-48)*100;
+        n += ((int)num[1]-48)*10;
+        n += ((int)num[2]-48);
+    }
+    else if (m == 2) {
+        n = ((int)num[0]-48)*10;
+        n += ((int)num[1]-48);
+    }
+    else if (m == 1) {
+        n = ((int)num[0]-48);
+    }
+    else if (m == 0) {
+        n = -1;
+    }
+
+    return n;
+}
+
+
+// Recupere la valeur (on ou off) en char*
+int recup_value_of_rule(int numDepart, char *rule) {
+    int n = -1;
+    int lettreO = 0;
+
+//    char* value = malloc(sizeof(char)*4);
+
+    for (int k = numDepart; k < strlen(rule); k++) {
+
+            if ((rule[k] == 'o') && (k == numDepart)) {
+                lettreO = 1;
+            }
+            else if ((rule[k] == 'n') && (lettreO == 1)) {
+                lettreO = 0;
+                n = 1;
+                //break;
+            }
+            else if (rule[k] > 32){
+                n = -1;
+                lettreO = 0;
+                break;
+            }
+    }
+    return n;
+}
+
+// Execute les regles si elles sont "on" ou si "n" > 0
+void exec_rules(StringTabs *rules, StringTabs *analyzedFiles) {
+
+    for (int k = 0; k < analyzedFiles->size; k++) {
+            printf("Fichier %d/%d --- %s ---\n", k+1, analyzedFiles->size, analyzedFiles->tab[k]);
+        for(int i = 0; i < rules->size; i++) {
+            int exist = check_if_rules_exist(rules->tab[i]);
+
+            if ((exist == 3) || (exist == 5) || (exist == 6)) {
+                if (strstr(rules->tab[i], "off") != NULL) {
+                    //printf("\n%s\n", rules->tab[i]);
+                    //printf("------------------ 1");
+                }
+                else {
+                    printf("\n%s\n", rules->tab[i]);
+                    printf("------------------\n");
+                    int n = 0;
+                    switch(exist) {
+
+                        case 3  : // 3  indent
+                            n = recup_number_of_rule(7, rules->tab[i]);
+                            break;
+                        case 5  : // 5  max-line-numbers
+                            n = recup_number_of_rule(17, rules->tab[i]);
+                            break;
+                        case 6  : // 6  max-file-line-numbers
+
+                            n = recup_number_of_rule(21, rules->tab[i]);
+                            if (n > -1) {
+                                max_file_line_numbers(analyzedFiles->tab[k], n);
+                            }
+                            else {
+                                printf(" --- Valeur saisie non valide\n");
+                            }
+                            break;
+                    }
+                }
+            }
+            else if (exist != -1) {
+                if (strstr(rules->tab[i], "on") != NULL) {
+                    printf("\n%s\n", rules->tab[i]);
+                    printf("------------------\n");
+                    int isValid = 0;
+                    switch(exist) {
+
+                        case 0  : // 0  array-bracket-eol
+                            isValid = recup_value_of_rule(18, rules->tab[i]);
+                            if (isValid > -1) {
+                                array_bracket_eol(analyzedFiles->tab[k]);
+                            }
+                            else {
+                                printf(" --- Valeur saisie non valide\n");
+                            }
+                            break;
+                        case 1  : // 1  operators-spacing
+                            isValid = recup_value_of_rule(18, rules->tab[i]);
+                            if (isValid > -1) {
+                                // regle
+                            }
+                            else {
+                                printf(" --- Valeur saisie non valide\n");
+                            }
+                            break;
+                        case 2  : // 2  comma-spacing                              !!!!!! ',' -> ne doit pas être une erreur
+                            isValid = recup_value_of_rule(14, rules->tab[i]);
+                            if (isValid > -1) {
+                                comma_spacing(analyzedFiles->tab[k]);
+                            }
+                            else {
+                                printf(" --- Valeur saisie non valide\n");
+                            }
+                            break;
+                        case 4  : // 4  comments-header
+                            isValid = recup_value_of_rule(16, rules->tab[i]);
+                            if (isValid > -1) {
+                                comments_header(analyzedFiles->tab[k]);
+                            }
+                            else {
+                                printf(" --- Valeur saisie non valide\n");
+                            }
+                            break;
+                        case 7  : // 7  no-trailing-spaces
+                            isValid = recup_value_of_rule(19, rules->tab[i]);
+                            if (isValid > -1) {
+                                // regle
+                            }
+                            else {
+                                printf(" --- Valeur saisie non valide\n");
+                            }
+                            break;
+                        case 8  : // 8  no-multi-declaration
+                            isValid = recup_value_of_rule(21, rules->tab[i]);
+                            if (isValid > -1) {
+                                // regle
+                            }
+                            else {
+                                printf(" --- Valeur saisie non valide\n");
+                            }
+                            break;
+                        case 9  : // 9  unused-variable
+                            isValid = recup_value_of_rule(16, rules->tab[i]);
+                            if (isValid > -1) {
+                                // regle
+                            }
+                            else {
+                                printf(" --- Valeur saisie non valide\n");
+                            }
+                            break;
+                        case 10  : // 10 undeclared-variable
+                            isValid = recup_value_of_rule(20, rules->tab[i]);
+                            if (isValid > -1) {
+                                // regle
+                            }
+                            else {
+                                printf(" --- Valeur saisie non valide\n");
+                            }
+                            break;
+                        case 11  : // 11 no-prototype
+                            isValid = recup_value_of_rule(13, rules->tab[i]);
+                            if (isValid > -1) {
+                                // regle
+                            }
+                            else {
+                                printf(" --- Valeur saisie non valide\n");
+                            }
+                            break;
+                        case 12  : // 12 unused-function
+                            isValid = recup_value_of_rule(16, rules->tab[i]);
+                            if (isValid > -1) {
+                                // regle
+                            }
+                            else {
+                                printf(" --- Valeur saisie non valide\n");
+                            }
+                            break;
+                        case 13  : // 13 undeclared-function
+                            isValid = recup_value_of_rule(20, rules->tab[i]);
+                            if (isValid > -1) {
+                                // regle
+                            }
+                            else {
+                                printf(" --- Valeur saisie non valide\n");
+                            }
+                            break;
+                        case 14  : // 14 variable-assignment-type
+                            isValid = recup_value_of_rule(25, rules->tab[i]);
+                            if (isValid > -1) {
+                                // regle
+                            }
+                            else {
+                                printf(" --- Valeur saisie non valide\n");
+                            }
+                            break;
+                        case 15  : // 15 function-parameters-type
+                            isValid = recup_value_of_rule(26, rules->tab[i]);
+                            if (isValid > -1) {
+                                // regle
+                            }
+                            else {
+                                printf(" --- Valeur saisie non valide\n");
+                            }
+                            break;
+                    }
+                }
+                else if (strstr(rules->tab[i], "off") != NULL) {
+
+                }
+                else {
+                    printf("\n%s\n", rules->tab[i]);
+                    printf("------------------\n");
+                    printf(" --- Valeur saisie non valide\n");
+                }
+            }
+        }
+        system("pause");
+        system("cls");
+    }
+}
+
 /*
     PT1
     Première étape : vérifier que les règles existent.
@@ -346,3 +640,207 @@ void getPath(char *path, char *fileName, char *target) {
         }
     }
 */
+
+/* ************************************************************************************************************************* */
+/*                                                          RULES            a deplacer                                      */
+/* ************************************************************************************************************************* */
+
+// L’accolade doit se trouver en fin de ligne pour les fonctions, if, boucles, …
+void array_bracket_eol(char *analyzedFiles) {
+
+    FILE* f = fopen(analyzedFiles, "r+");
+
+    if (f != NULL) {
+
+        //printf("Ouverture du fichier reussie\n");
+
+        char c;
+        int numberLine = 1;
+        int sautDeLigne = 0;
+        int espace = 0;
+
+        // Parcours du fichier f caractere par caractere
+        while ((c = fgetc(f)) != EOF) {
+
+            if (c == '\n') {
+                espace = 0;
+                sautDeLigne = 1;
+                numberLine++;
+            }
+            // Si après un saut de ligne il y a une accolade ouvrante OU si apres un saut de ligne et apres plusieurs espaces il y a une accolade ouvrante
+            else if (((c == '{') && (sautDeLigne == 1)) || ((sautDeLigne == 1) && (espace > 0) && (c == '{'))) {
+
+                printf(" --- Erreur de la regle array-bracket-eol, a la ligne :");
+                printf(" %d\n",  numberLine);
+                sautDeLigne = 0;
+                espace = 0;
+            }
+            // si c'est un espace ou une tabulation ET qu'il suit un saut de ligne
+            else if (((c == ' ') || (c == '	'))  && (sautDeLigne == 1)) {
+                espace++;
+            }
+            // si ce n'est ni un espace ni une tabulation ET qu'il suit un saut de ligne
+            else if (((c != ' ') || ((c == '	'))) && (sautDeLigne == 1)) {
+                espace = 0;
+                sautDeLigne = 0;
+            }
+        }
+    }
+    else {
+        printf("Echec de l'ouverture du fichier");
+    }
+
+}
+
+// Il doit avoir un espace à droite d’une virgule.
+void comma_spacing(char *analyzedFiles) {
+
+    FILE* f = fopen(analyzedFiles, "r+");
+
+    if (f != NULL) {
+
+        //printf("Ouverture du fichier reussie\n");
+        char c;
+        int numberLine = 1;
+        int virgule = 0;
+        int guillemets = 0;
+
+        // Parcours du fichier f caractere par caractere
+        while ((c = fgetc(f)) != EOF) {
+
+            if (c == '\n') {
+                virgule = 0;
+                numberLine++;
+            }
+            else if (c == ',') {
+                virgule = 1;
+            }
+            // ne prends pas en compte les parties entre guillemets
+            else if (c == '"') {
+                guillemets = 1;
+                while ((c = fgetc(f)) != '"') {
+                    if (c == '\n') {
+                        numberLine++;
+                    }
+                    else if ((c == '\'') && (guillemets == 1)) {
+                        break;
+                    }
+                    else if ((c != '\'') && (guillemets == 1)) {
+                        guillemets = 0;
+                    }
+                }
+            }
+            else if (c == '\'') { // ne prends pas en compte ce qui est entre ''
+                while ((c = fgetc(f)) != '\'') {
+                }
+            }
+            // ne prend pas en compte les commentaires
+            else if (c == '/') {
+                c = fgetc(f);
+                if (c == '/') {
+                    while ((c = fgetc(f)) != '\n') {
+                    }
+                    numberLine++;
+                }
+                else if (c == '*') {
+                    int etoile = 0;
+                    while (((c = fgetc(f)) != '/') || (etoile == 0)) {
+                        etoile = 0;
+                        if (c == '\n') {
+                            numberLine++;
+                        }
+                        else if (c == '*') {
+                            etoile = 1;
+                        }
+                    }
+                }
+            }
+            else if ((c != ' ') && (virgule == 1)) {
+
+                virgule = 0;
+                printf(" --- Erreur de la regle comma-spacing, a la ligne :");
+                printf(" %d\n",  numberLine);
+            }
+            else {
+                virgule = 0;
+            }
+        }
+    }
+}
+
+// Test la présence d’un commentaire multi-ligne en entête de fichier.
+void comments_header(char *analyzedFiles) {
+    FILE* f = fopen(analyzedFiles, "r+");
+
+    if (f != NULL) {
+
+        //printf("Ouverture du fichier reussie\n");
+
+        char c;
+        int numberLine = 1;
+
+        // Parcours du fichier f caractere par caractere
+        while ((c = fgetc(f)) != EOF) {
+            // test la presence d'un commentaire et s'il a plusieurs lignes ou non
+            if (c == '/') {
+                c = fgetc(f);
+                if (c == '*') {
+                    int etoile = 0;
+                    while (((c = fgetc(f)) != '/') || (etoile == 0)) {
+                        etoile = 0;
+                        if (c == '\n') {
+                            numberLine++;
+                        }
+                        if (c == '*') {
+                            etoile = 1;
+                        }
+                    }
+                    if (numberLine > 1) {
+                        printf(" --- Regle comments-header : OUI\n");
+                        break;
+                    }
+                    else {
+                        printf(" --- Regle comments-header : NON\n");
+                        break;
+                    }
+                }
+                else {
+                    printf(" --- Regle comments-header : NON\n");
+                    break;
+                }
+            }
+            else {
+                printf(" --- Regle comments-header : NON\n");
+                break;
+            }
+
+        }
+
+    }
+}
+
+// Les fichiers ne doivent pas dépasser n lignes.
+void max_file_line_numbers(char *analyzedFiles, int maxLineNumber) {
+    FILE* f = fopen(analyzedFiles, "r+");
+
+    if (f != NULL) {
+
+        //printf("Ouverture du fichier reussie\n");
+        char c;
+        int numberLine = 1;
+
+        // Parcours du fichier f caractere par caractere
+        while ((c = fgetc(f)) != EOF) {
+
+            if (c == '\n') {
+                numberLine++;
+            }
+            // si le nombre de lignes depasse le nombre max defini,
+            if (numberLine > maxLineNumber)  {
+                printf(" --- Erreur de la regle max-file-line-numbers: le fichier depasse le nombre de ligne:");
+                printf(" %d\n",  maxLineNumber);
+                break;
+            }
+        }
+    }
+}
