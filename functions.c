@@ -207,7 +207,8 @@ void addExcludedFile(char *excluded, StringTabs* excludedFiles) {
 
 // Parcours et récupère tous les fichiers .c à analyser
 void browseDir(StringTabs *analyzedFiles, char *currDirectory, StringTabs *excludedFiles, int recursive) {
-    char* temp = malloc(sizeof(char) * 250);
+    char* temp = malloc(sizeof(char) * 300);
+    printf("%s\n", currDirectory);
     DIR *dir = opendir(currDirectory);
     DIR *test;
     struct dirent *d_res;
@@ -324,6 +325,50 @@ void getPath(char *path, char *fileName, char *target) {
     strcat(target, "/");
     strcat(target, fileName);
     target[strlen(target)] = '\0';
+}
+
+void getDirToAnalyze(char *path) {
+    int redo = 1;
+    while(redo) {
+        redo = 0;
+        printf("Veuillez saisir le chemin d'acces vers le dossier a analyser : \n");
+        fflush(stdin);
+        fflush(stdin);
+        scanf("%[^\n]s", path);
+        redo = !isPathADir(path);
+    }
+    modifySpecialChar(path);
+}
+
+int isPathADir(char *p) {
+    int i;
+    int temp = 0;
+    char *ret;
+    if(strlen(p) <= 1) {
+        return 1;
+    }
+    for(i = 0; i < strlen(p); i++) {
+        if(p[i] == '\\' || p[i] == '/') {
+            temp = i;
+        }
+    }
+    temp += temp != 0 ? 1 : 0;
+    ret = malloc(sizeof(char) * (strlen(p) - temp + 1));
+    strncpy(ret, p + temp, strlen(p) - temp);
+    ret[strlen(ret)] = '\0';
+
+    temp = isDir(ret);
+    free(ret);
+    return temp;
+}
+
+void modifySpecialChar(char *path) {
+    int i;
+    for(i = 0; i < strlen(path); i++) {
+        if(path[i] == -126) {
+            path[i] = -23;
+        }
+    }
 }
 
 // Vérifie si la regle en parametre existe.

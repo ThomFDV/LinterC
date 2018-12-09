@@ -4,6 +4,8 @@
 // Valeur de retour : si la vérification de fichier par le programme est récursive (1) ou non (0)
 int parseConf(StringTabs*, StringTabs*, char*);
 
+void getDirToAnalyze(char*);
+
 // Parse les règles dans le fichier de configuration
 void parseRules(FILE*, StringTabs*);
 
@@ -47,6 +49,13 @@ int isDir(char*);
 
 // Concatène le chemin d'accès et le nom du fichier pour soit le stocker, soit ouvrir un nouveau dossier
 void getPath(char*, char*, char*);
+
+// Saisie du chemin pour le dossier à analyser
+void getDirToAnalyze(char*);
+
+int isPathADir(char*);
+
+void modifySpecialChar(char*);
 
 /*
     PT1
