@@ -5,7 +5,7 @@ main.lconf
 - array-bracket-eol : off
 - operator-spacing : off
 - comma-spacing : on
-- indent : n
+- max-file-line-numbers : 4
 
 =excludedFiles
 - bonjour.c

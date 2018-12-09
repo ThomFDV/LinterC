@@ -46,7 +46,7 @@
 1541947564 c:\users\corentin\desktop\esgi\année 3-2\semestre 1\langage c\projet - linterc\linterc\struct.h
 	<stdio.h>
 
-1543252853 source:c:\users\corentin\desktop\esgi\année 3-2\semestre 1\langage c\projet - linterc\repo\linterc\functions.c
+1544359665 source:c:\users\corentin\desktop\esgi\année 3-2\semestre 1\langage c\projet - linterc\repo\linterc\functions.c
 	<stdio.h>
 	<stdlib.h>
 	<string.h>
@@ -56,21 +56,22 @@
 	<errno.h>
 	"functions.h"
 
-1543252465 c:\users\corentin\desktop\esgi\année 3-2\semestre 1\langage c\projet - linterc\repo\linterc\functions.h
+1544357549 c:\users\corentin\desktop\esgi\année 3-2\semestre 1\langage c\projet - linterc\repo\linterc\functions.h
 	<stdio.h>
 	"struct.h"
 
 1541947564 c:\users\corentin\desktop\esgi\année 3-2\semestre 1\langage c\projet - linterc\repo\linterc\struct.h
 	<stdio.h>
 
-1543163995 source:c:\users\corentin\desktop\esgi\année 3-2\semestre 1\langage c\projet - linterc\repo\linterc\main.c
+1544357549 source:c:\users\corentin\desktop\esgi\année 3-2\semestre 1\langage c\projet - linterc\repo\linterc\main.c
 	<stdio.h>
 	<stdlib.h>
 	<string.h>
 	<windows.h>
 	"functions.h"
+	"parcours.h"
 
-1543252465 source:c:\users\corentin\desktop\esgi\année 3-2\semestre 1\langage c\projet - linterc\repo\linterc\functions.h
+1544357549 source:c:\users\corentin\desktop\esgi\année 3-2\semestre 1\langage c\projet - linterc\repo\linterc\functions.h
 	<stdio.h>
 	"struct.h"
 

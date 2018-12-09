@@ -331,7 +331,7 @@ void getPath(char *path, char *fileName, char *target) {
 // retourne 2 si elle existe et que sa valeur sera on|off,
 // retourne 0 si elle n'existe pas ou si elle est mal ecrite.
 int check_if_rules_exist(char *rule) {
-
+    int i;
     int exist = -1;
     StringTabs *rulesTest = initTabs(16);
     rulesTest->tab[0] = "array-bracket-eol";
@@ -351,7 +351,7 @@ int check_if_rules_exist(char *rule) {
     rulesTest->tab[14] = "variable-assignment-type";
     rulesTest->tab[15] = "function-parameters-type";
 
-    for (int i = 0; i < 16; i++) {
+    for (i = 0; i < 16; i++) {
 
         if (strstr(rule, rulesTest->tab[i]) != NULL) {
 
@@ -359,6 +359,7 @@ int check_if_rules_exist(char *rule) {
             break;
         }
     }
+    freeTabs(rulesTest);
     return exist;
 }
 
@@ -366,25 +367,23 @@ int check_if_rules_exist(char *rule) {
 int recup_number_of_rule(int numDepart, char *rule) {
     int n = -1;
     int m = 0;
+    int k;
 //    int autre = 0;
     int chiffre = 0;
-    char* num = malloc(sizeof(char)*4);
+    char *num = malloc(sizeof(char)*4);
 
-    for (int k = numDepart; k < strlen(rule); k++) {
+    for (k = numDepart; k < strlen(rule); k++) {
 
         if (((rule[k] > 47) && (rule[k] < 58)) && ((chiffre == 1) || (m == 0))) { // si c'est un chiffre
             num[m] = rule[k];
             m++;
             chiffre = 1;
-        }
-        else if (((rule[k] < 48) || (rule[k] > 57)) && (chiffre == 1)) { // si ce n'est pas un chiffre mais qu'il y en avait un avant
+        } else if (((rule[k] < 48) || (rule[k] > 57)) && (chiffre == 1)) { // si ce n'est pas un chiffre mais qu'il y en avait un avant
             chiffre = 0;
-        }
-        else if ((rule[k] > 32) && (chiffre == 0) && (m > 0)) { // si c'est n'importe quel caractere et qu'il y avait un chiffre avant mais pas directement
+        } else if ((rule[k] > 32) && (chiffre == 0) && (m > 0)) { // si c'est n'importe quel caractere et qu'il y avait un chiffre avant mais pas directement
             m = 0;
             break;
-        }
-        else if (rule[k] > 32){ // si ce n'est pas un espace
+        } else if (rule[k] > 32){ // si ce n'est pas un espace
             m = 0;
             break;
         }
@@ -394,23 +393,19 @@ int recup_number_of_rule(int numDepart, char *rule) {
         n += ((int)num[1]-48)*100;
         n += ((int)num[2]-48)*10;
         n += ((int)num[3]-48);
-    }
-    if (m == 3) {
+    } else if (m == 3) {
         n = ((int)num[0]-48)*100;
         n += ((int)num[1]-48)*10;
         n += ((int)num[2]-48);
-    }
-    else if (m == 2) {
+    } else if (m == 2) {
         n = ((int)num[0]-48)*10;
         n += ((int)num[1]-48);
-    }
-    else if (m == 1) {
+    } else if (m == 1) {
         n = ((int)num[0]-48);
-    }
-    else if (m == 0) {
+    } else if (m == 0) {
         n = -1;
     }
-
+    free(num);
     return n;
 }
 
@@ -419,20 +414,17 @@ int recup_number_of_rule(int numDepart, char *rule) {
 int recup_value_of_rule(int numDepart, char *rule) {
     int n = -1;
     int lettreO = 0;
-
+    int k;
 //    char* value = malloc(sizeof(char)*4);
-
-    for (int k = numDepart; k < strlen(rule); k++) {
+    for (k = numDepart; k < strlen(rule); k++) {
 
             if ((rule[k] == 'o') && (k == numDepart)) {
                 lettreO = 1;
-            }
-            else if ((rule[k] == 'n') && (lettreO == 1)) {
+            } else if ((rule[k] == 'n') && (lettreO == 1)) {
                 lettreO = 0;
                 n = 1;
                 //break;
-            }
-            else if (rule[k] > 32){
+            } else if (rule[k] > 32){
                 n = -1;
                 lettreO = 0;
                 break;
@@ -443,21 +435,24 @@ int recup_value_of_rule(int numDepart, char *rule) {
 
 // Execute les regles si elles sont "on" ou si "n" > 0
 void exec_rules(StringTabs *rules, StringTabs *analyzedFiles) {
-
-    for (int k = 0; k < analyzedFiles->size; k++) {
-            printf("Fichier %d/%d --- %s ---\n", k+1, analyzedFiles->size, analyzedFiles->tab[k]);
-        for(int i = 0; i < rules->size; i++) {
-            int exist = check_if_rules_exist(rules->tab[i]);
+    int k;
+    int i;
+    int exist;
+    int n;
+    int isValid;
+    for (k = 0; k < analyzedFiles->size; k++) {
+        printf("Fichier %d/%d --- %s ---\n", k+1, analyzedFiles->size, analyzedFiles->tab[k]);
+        for(i = 0; i < rules->size; i++) {
+            exist = check_if_rules_exist(rules->tab[i]);
 
             if ((exist == 3) || (exist == 5) || (exist == 6)) {
                 if (strstr(rules->tab[i], "off") != NULL) {
                     //printf("\n%s\n", rules->tab[i]);
                     //printf("------------------ 1");
-                }
-                else {
+                } else {
                     printf("\n%s\n", rules->tab[i]);
                     printf("------------------\n");
-                    int n = 0;
+                    n = 0;
                     switch(exist) {
 
                         case 3  : // 3  indent
@@ -478,14 +473,12 @@ void exec_rules(StringTabs *rules, StringTabs *analyzedFiles) {
                             break;
                     }
                 }
-            }
-            else if (exist != -1) {
+            } else if (exist != -1) {
                 if (strstr(rules->tab[i], "on") != NULL) {
                     printf("\n%s\n", rules->tab[i]);
                     printf("------------------\n");
-                    int isValid = 0;
+                    isValid = 0;
                     switch(exist) {
-
                         case 0  : // 0  array-bracket-eol
                             isValid = recup_value_of_rule(18, rules->tab[i]);
                             if (isValid > -1) {
@@ -604,11 +597,9 @@ void exec_rules(StringTabs *rules, StringTabs *analyzedFiles) {
                             }
                             break;
                     }
-                }
-                else if (strstr(rules->tab[i], "off") != NULL) {
+                } else if (strstr(rules->tab[i], "off") != NULL) {
 
-                }
-                else {
+                } else {
                     printf("\n%s\n", rules->tab[i]);
                     printf("------------------\n");
                     printf(" --- Valeur saisie non valide\n");
@@ -685,6 +676,7 @@ void array_bracket_eol(char *analyzedFiles) {
                 sautDeLigne = 0;
             }
         }
+        fclose(f);
     }
     else {
         printf("Echec de l'ouverture du fichier");
@@ -765,6 +757,7 @@ void comma_spacing(char *analyzedFiles) {
                 virgule = 0;
             }
         }
+        fclose(f);
     }
 }
 
@@ -815,7 +808,7 @@ void comments_header(char *analyzedFiles) {
             }
 
         }
-
+        fclose(f);
     }
 }
 
@@ -824,14 +817,12 @@ void max_file_line_numbers(char *analyzedFiles, int maxLineNumber) {
     FILE* f = fopen(analyzedFiles, "r+");
 
     if (f != NULL) {
-
         //printf("Ouverture du fichier reussie\n");
         char c;
         int numberLine = 1;
 
         // Parcours du fichier f caractere par caractere
         while ((c = fgetc(f)) != EOF) {
-
             if (c == '\n') {
                 numberLine++;
             }
@@ -843,4 +834,5 @@ void max_file_line_numbers(char *analyzedFiles, int maxLineNumber) {
             }
         }
     }
+    fclose(f);
 }
