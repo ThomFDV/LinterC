@@ -46,7 +46,7 @@
 1541947564 c:\users\corentin\desktop\esgi\année 3-2\semestre 1\langage c\projet - linterc\linterc\struct.h
 	<stdio.h>
 
-1544368808 source:c:\users\corentin\desktop\esgi\année 3-2\semestre 1\langage c\projet - linterc\repo\linterc\functions.c
+1544454932 source:c:\users\corentin\desktop\esgi\année 3-2\semestre 1\langage c\projet - linterc\repo\linterc\functions.c
 	<stdio.h>
 	<stdlib.h>
 	<string.h>
@@ -56,14 +56,14 @@
 	<errno.h>
 	"functions.h"
 
-1544368955 c:\users\corentin\desktop\esgi\année 3-2\semestre 1\langage c\projet - linterc\repo\linterc\functions.h
+1544454571 c:\users\corentin\desktop\esgi\année 3-2\semestre 1\langage c\projet - linterc\repo\linterc\functions.h
 	<stdio.h>
 	"struct.h"
 
-1541947564 c:\users\corentin\desktop\esgi\année 3-2\semestre 1\langage c\projet - linterc\repo\linterc\struct.h
+1544453241 c:\users\corentin\desktop\esgi\année 3-2\semestre 1\langage c\projet - linterc\repo\linterc\struct.h
 	<stdio.h>
 
-1544368169 source:c:\users\corentin\desktop\esgi\année 3-2\semestre 1\langage c\projet - linterc\repo\linterc\main.c
+1544450134 source:c:\users\corentin\desktop\esgi\année 3-2\semestre 1\langage c\projet - linterc\repo\linterc\main.c
 	<stdio.h>
 	<stdlib.h>
 	<string.h>
@@ -71,7 +71,7 @@
 	"functions.h"
 	"parcours.h"
 
-1544368955 source:c:\users\corentin\desktop\esgi\année 3-2\semestre 1\langage c\projet - linterc\repo\linterc\functions.h
+1544454571 source:c:\users\corentin\desktop\esgi\année 3-2\semestre 1\langage c\projet - linterc\repo\linterc\functions.h
 	<stdio.h>
 	"struct.h"
 
@@ -81,7 +81,7 @@
 	<string.h>
 	"parcours.h"
 
-1543271063 c:\users\corentin\desktop\esgi\année 3-2\semestre 1\langage c\projet - linterc\repo\linterc\parcours.h
+1544454291 c:\users\corentin\desktop\esgi\année 3-2\semestre 1\langage c\projet - linterc\repo\linterc\parcours.h
 	<stdio.h>
 
 1544106358 source:c:\users\e2854663\documents\c_ecole\langage c\linterc\functions.c
@@ -147,4 +147,9 @@
 1544438282 source:c:\users\thomfdv\desktop\langage-c\linterc-master\functions.h
 	<stdio.h>
 	"struct.h"
+
+1544453409 source:c:\users\corentin\desktop\esgi\année 3-2\semestre 1\langage c\projet - linterc\repo\linterc\structfunctions.c
+	<stdlib.h>
+	<string.h>
+	"functions.h"
 

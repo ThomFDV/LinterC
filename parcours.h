@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-// Parcours de tous les éventuels espaces
+/*// Parcours de tous les éventuels espaces
 void goThroughSpaces(FILE*);
 
 // Parcours le contenu entre parenthèses
@@ -13,4 +13,4 @@ void goThroughStrings(FILE*);
 void goThroughLine(FILE*);
 
 // Parcours un commentaire multiligne. Incrémente le nombre de lignes si besoin
-void goThroughComment(FILE*, int*);
+void goThroughComment(FILE*, int*);*/

@@ -83,6 +83,9 @@ void isQuote(char* c, FILE* f);
 // Retourne 1 si un saut a la ligne est rencontré
 int isLine(char* c);
 
+// Passe la ligne si c'est un include
+void isSharp(char*, FILE*, int*);
+
 /* ************************************************************************************************************************* */
 /*                                                          RULES                                                            */
 /* ************************************************************************************************************************* */
@@ -110,4 +113,110 @@ void trailingSpaces(char* filename);
 
 // Vérifie s'il y a bien un espace entre chaque opérateurs
 void operatorsSpacing(char* filename);
+
+/* ------------------------------------ CORENTIN ------------------------------------- */
+
+int isADir(char*);
+
+// Récupère le type, le nom et les paramètres de toutes les fonctions du fichier
+void getFuncAndVariables(FILE*, FuncTab*, FuncTab*, VarTab*, calledStuff*, calledStuff*);
+
+// Si la ligne commence avec un type, le renvoie, sinon renvoie NULL
+int startWithType(FILE*, char*);
+
+// Parcours de tous les éventuels espaces
+void goThroughSpaces(FILE*);
+
+// Renvoie 0 si le caractère n'est pas valide pour un nom de fonction
+int isValidChar(char);
+
+// Parcours le contenu entre parenthèses
+void goThroughParams(FILE*);
+
+// Parcours la chaine de caractère
+void goThroughStrings(FILE*);
+
+// Parcours le reste ou la ligne entière
+void goThroughLine(FILE*, int*, int*);
+
+// Parcours un commentaire multiligne. Incrémente le nombre de lignes si besoin
+void goThroughComment(FILE*, int*);
+
+// Initialisation du tableau de fonctions
+FuncTab *initFuncTab(int);
+
+// Ajout d'une fonction au tableau
+void addFunction(FuncTab*, char*, char*, int, int);
+
+// Libère la mémoire allouée au tableau de fonctions
+void freeFuncTab(FuncTab*);
+
+// Initialisation d'un tableau de variables
+VarTab *initVarTab(int);
+
+// Ajout d'une fonction au tableau
+void addVariable(VarTab*, char*, char*, Functions*, int);
+
+// Libère la mémoire allouée au tableau de fonctions
+void freeVarTab(VarTab*);
+
+// Récupère les paramètres d'une fonction
+void getParams(FILE*, long, Functions*, VarTab*, int);
+
+// Parcours jusqu'au prochain paramètre ou la fin de la déclaration de fonction si il n'y a plus de paramètres
+int goToNextParam(FILE*);
+
+// Retourne le nom du type que l'on ne connait pas, pour ne pas bloquer l'analyse de la fonction et des parametres
+char *getUnknownType(FILE*);
+
+// parse une ligne pour voir si il y a des variables utilisées ou des fonctions appelées
+void analyzeLine(FILE*, int, int*, FuncTab*, calledStuff*, calledStuff*);
+
+// Vérifie que chaque fonction a bien un prototype
+void no_prototype(FuncTab*, FuncTab*);
+
+// Vérifie que la fonction n'est pas dans les includes de base
+int isAnIncludedFunc(char*);
+
+// Si c'est un nombre, pas la peine de l'analysze avec les autres variables ou fonctions déclarées
+int isJustANumber(char*);
+
+// vérifie que c'est pas un while, for, if etc...
+int isAnInstruction(char*);
+
+// Initialise une liste de fonctions ou variables appelées
+calledStuff *initCalledStuff(int);
+
+// Ajoute une ligne à la liste
+void addCalledStuff(calledStuff*, char*, int);
+
+// Libère la place de la liste en mémoire
+void freeCalledStuff(calledStuff*);
+
+// Vérifie que la première variable Functions* est un prototype de la deuxième
+int isAPrototypeOf(Functions*, Functions*);
+
+// Vérifie si la variable est une constante connue ou non
+int isAConstant(char*);
+
+// Renvoie 1 si c'est un carctère qui peut potentiellement suivre une variable, sinon 0
+int isFollowedByRightOps(char);
+
+// Fonction du sujet
+void no_prototype(FuncTab*, FuncTab*);
+
+// Fonction du sujet
+void unused_function(FuncTab*, calledStuff*);
+
+// Fonction du sujet
+void undeclared_function(FuncTab*, calledStuff*);
+
+// Fonction du sujet
+void unused_variable(VarTab*, calledStuff*);
+
+// Vérifie que la variable est utilisée dans la fonction où est instanciée la variable
+int isInFunc(Functions*, int);
+
+// Fonction du sujet
+void undeclared_variable(VarTab*, calledStuff*);
 

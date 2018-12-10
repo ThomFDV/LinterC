@@ -189,8 +189,11 @@ void modifyRules(char *rule, StringTabs *rules) {
         addString(rules, rule);
         printf("La regle a ete ajoutee\n");
     } else {
-        strcpy(rules->tab[found], rule);
-        printf("La regle a ete modifiee\n");
+        if(strcmp(rule, rules->tab[found])) {
+            strcpy(rules->tab[found], rule);
+            rules->tab[found][strlen(rules->tab[found])] = '\0';
+            printf("La regle %s a ete modifiee\n", rules->tab[found]);
+        }
     }
 }
 
@@ -307,7 +310,9 @@ void addString(StringTabs *t, char *s) {
     if(t->size == t->maxSize) {
         increaseTabSize(t);
     }
-    strcpy(t->tab[t->size++], s);
+    strcpy(t->tab[t->size], s);
+    t->tab[t->size][strlen(t->tab[t->size])] = '\0';
+    t->size += 1;
 }
 
 int isDir(char *s) {
@@ -486,6 +491,11 @@ void exec_rules(StringTabs *rules, StringTabs *analyzedFiles) {
     int n;
     int isValid;
     for (k = 0; k < analyzedFiles->size; k++) {
+        FuncTab *prototypes = initFuncTab(5);
+        FuncTab *declaredFunc = initFuncTab(5);
+        VarTab *declaredVar = initVarTab(5);
+        calledStuff *calledFunc = initCalledStuff(5);
+        calledStuff *usedVars = initCalledStuff(5);
         printf("Fichier %d/%d --- %s ---\n", k+1, analyzedFiles->size, analyzedFiles->tab[k]);
         for(i = 0; i < rules->size; i++) {
             exist = check_if_rules_exist(rules->tab[i]);
@@ -503,7 +513,7 @@ void exec_rules(StringTabs *rules, StringTabs *analyzedFiles) {
                         case 3  : // 3  indent
                             n = recup_number_of_rule(7, rules->tab[i]);
                             if (n > -1) {
-                                checkIndent(analyzedFiles->tab[k], n);
+                                checkIndent(&n, analyzedFiles->tab[k]);
                             }
                             else {
                                 printf(" --- Valeur saisie non valide\n");
@@ -512,7 +522,7 @@ void exec_rules(StringTabs *rules, StringTabs *analyzedFiles) {
                         case 5  : // 5  max-line-numbers
                             n = recup_number_of_rule(17, rules->tab[i]);
                             if (n > -1) {
-                                maxLineNumbers(analyzedFiles->tab[k], n);
+                                maxLineNumbers(analyzedFiles->tab[k], &n);
                             }
                             else {
                                 printf(" --- Valeur saisie non valide\n");
@@ -594,6 +604,7 @@ void exec_rules(StringTabs *rules, StringTabs *analyzedFiles) {
                             isValid = recup_value_of_rule(16, rules->tab[i]);
                             if (isValid > -1) {
                                 // regle
+                                unused_variable(declaredVar, usedVars);
                             }
                             else {
                                 printf(" --- Valeur saisie non valide\n");
@@ -603,6 +614,7 @@ void exec_rules(StringTabs *rules, StringTabs *analyzedFiles) {
                             isValid = recup_value_of_rule(20, rules->tab[i]);
                             if (isValid > -1) {
                                 // regle
+                                undeclared_variable(declaredVar, usedVars);
                             }
                             else {
                                 printf(" --- Valeur saisie non valide\n");
@@ -612,6 +624,7 @@ void exec_rules(StringTabs *rules, StringTabs *analyzedFiles) {
                             isValid = recup_value_of_rule(13, rules->tab[i]);
                             if (isValid > -1) {
                                 // regle
+                                no_prototype(prototypes, declaredFunc);
                             }
                             else {
                                 printf(" --- Valeur saisie non valide\n");
@@ -621,6 +634,7 @@ void exec_rules(StringTabs *rules, StringTabs *analyzedFiles) {
                             isValid = recup_value_of_rule(16, rules->tab[i]);
                             if (isValid > -1) {
                                 // regle
+                                unused_function(declaredFunc, calledFunc);
                             }
                             else {
                                 printf(" --- Valeur saisie non valide\n");
@@ -630,6 +644,7 @@ void exec_rules(StringTabs *rules, StringTabs *analyzedFiles) {
                             isValid = recup_value_of_rule(20, rules->tab[i]);
                             if (isValid > -1) {
                                 // regle
+                                undeclared_function(declaredFunc, calledFunc);
                             }
                             else {
                                 printf(" --- Valeur saisie non valide\n");
@@ -663,6 +678,13 @@ void exec_rules(StringTabs *rules, StringTabs *analyzedFiles) {
                 }
             }
         }
+        freeCalledStuff(calledFunc);
+        freeCalledStuff(usedVars);
+        freeFuncTab(prototypes);
+        printf("Free 1 done\n");
+        freeFuncTab(declaredFunc);
+        printf("Free 2 done\n");
+        freeVarTab(declaredVar);
         system("pause");
         system("cls");
     }
@@ -702,27 +724,6 @@ int isLine(char* c){
         return 0;
     }
 }
-
-/*
-    PT1
-    Première étape : vérifier que les règles existent.
-    Pour ça, ça serait bien de faire une sous-fonction "check_si_regle_existe"
-    Ensuite il faut regarder si la valeur affectée à la règle est valide :
-        - Si elle est à off on la lance pas
-        - Si elle est à on, on la lance seulement si la fonction a pas besoin d'argument
-        - Si c'est autre chose, on vérifie que le type de la valeur correspond bien au type de paramètre attendu,
-          et donc si c'est bon on la lance (en convertissant si besoin la valeur qui sera une chaine de caractère
-          en int par exemple), sinon on lance pas
-    Du coup ça donnerait quelque chose comme ça :
-    Pour chaque règle :
-    if(check_si_regle_existe(nom_regle)) {
-        if(check_si_valeur_ok(nom_regle, valeur_regle) {
-            for(i = 0; i < strlen(analyzedFiles->size); i++) {
-
-            }
-        }
-    }
-*/
 
 /* ************************************************************************************************************************* */
 /*                                                          RULES            a deplacer                                      */
@@ -945,6 +946,7 @@ void operatorsSpacing(char* filename){
         while((c = fgetc(f)) != EOF ){
             isComment(&c, f, &lines);
             isQuote(&c, f);
+            isSharp(&c, f, &lines);
             lines += isLine(&c);
             for(i = 0; i < 11; i++){
                 if(c == operators[i]){
@@ -995,6 +997,7 @@ void operatorsSpacing(char* filename){
                 }
                 pbmBefore = 0;
                 pbmAfter = 0;
+                pointeur = 0;
             }
         }
     }
@@ -1028,11 +1031,11 @@ void maxLineNumbers(char* filename, int* n){
     int lines = 0;
     int charCounter;
     charCounter = 0;
-    int charMax = n;
+    int charMax = *n;
     if(f != NULL){
         while((c = fgetc(f)) != EOF ){
-            isComment(&c, f, &lines);
-            isQuote(&c, f);
+            /*isComment(&c, f, &lines);
+            isQuote(&c, f);*/
             lines += isLine(&c);
             if(c == '\n'){
                 if(charCounter > charMax){
@@ -1050,7 +1053,6 @@ void maxLineNumbers(char* filename, int* n){
 void checkIndent(int* n, char* filename){
     FILE* f = fopen(filename,"r");
     char c;
-    int i;
     int m;
     int newN;
     int lines = 1;
@@ -1061,8 +1063,8 @@ void checkIndent(int* n, char* filename){
     int spaceBefore = 0;
     int newSpaceCounter = 0;
     int wentBack = 0;
-    newN = n;
-    m = n;
+    newN = *n;
+    m = *n;
 
     if(f != NULL){
         while((c = fgetc(f)) != EOF ){
@@ -1119,4 +1121,867 @@ void checkIndent(int* n, char* filename){
         }
     }
     fclose(f);
+}
+
+void isSharp(char* c, FILE* f, int* lines){
+    if(*c == '#'){
+        do{
+            *c = fgetc(f);
+        } while(*c != '\n');
+    }
+}
+
+/* ---------------- CORENTIN ------------------------- */
+
+int isAnIncludedFunc(char *func) {
+    char tab[89][40] =  {"printf",
+                        "scanf",
+                        "getc",
+                        "gets",
+                        "getchar",
+                        "puts",
+                        "putchar",
+                        "clearerr",
+                        "fopen",
+                        "fclose",
+                        "getw",
+                        "putw",
+                        "fgetc",
+                        "putc",
+                        "fputc",
+                        "fgets",
+                        "fputs",
+                        "feof",
+                        "fgetchar",
+                        "fprintf",
+                        "fscanf",
+                        "fputchar",
+                        "fseek",
+                        "ftell",
+                        "sizeof",
+                        "rewind",
+                        "sprint",
+                        "sscanf",
+                        "remove",
+                        "fflush",
+                        "malloc",
+                        "calloc",
+                        "realloc",
+                        "free",
+                        "abs",
+                        "div",
+                        "abort",
+                        "exit",
+                        "system",
+                        "atoi",
+                        "atol",
+                        "atof",
+                        "strtod",
+                        "strtol",
+                        "getenv",
+                        "setenv",
+                        "perror",
+                        "rand",
+                        "delay",
+                        "strcat",
+                        "strncat",
+                        "strcpy",
+                        "strncpy",
+                        "strlen",
+                        "strcmp",
+                        "strcmpi",
+                        "strchr",
+                        "strrchr",
+                        "strstr",
+                        "strrstr",
+                        "strdup",
+                        "strlwr",
+                        "strupr",
+                        "strrev",
+                        "strset",
+                        "strnset",
+                        "strtok",
+                        "memset",
+                        "memcpy",
+                        "memmove",
+                        "memcmp",
+                        "memicmp",
+                        "memchr",
+                        "floor",
+                        "round",
+                        "ceil",
+                        "sin",
+                        "cos",
+                        "cosh",
+                        "exp",
+                        "tan",
+                        "tanh",
+                        "sinh",
+                        "log",
+                        "log10",
+                        "sqrt",
+                        "pow",
+                        "trunc",
+                        "return"};
+    int i;
+    for(i = 0; i < 89; i++) {
+        if(!strcmp(func, tab[i])) {
+            printf("%s matched with %s\n", func, tab[i]);
+            return 1;
+        }
+    }
+    return 0;
+}
+
+int isJustANumber(char *s) {
+    int i;
+    for(i = 0; i < strlen(s); i++) {
+        if(s[i] < '0' || s[i] > '9') {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+int isAnInstruction(char *s) {
+    char instructions[7][10] = {"while", "for", "if", "do", "else", "switch", "return"};
+    int i;
+    for(i = 0; i < 7; i++) {
+        if(!strcmp(s, instructions[i])) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+int isAConstant(char *s) {
+    char tab[47][20] = {"BUFSIZ",
+                      "_IOFBF",
+                      "_IOLBF",
+                      "_IOLBF",
+                      "L_ctermid",
+                      "L_tmpnam",
+                      "SEEK_CUR",
+                      "SEEK_END",
+                      "SEEK_SET",
+                      "FILENAME_MAX",
+                      "FOPEN_MAX",
+                      "TMP_MAX",
+                      "EOF",
+                      "NULL",
+                      "P_tmpdir",
+                      "EXIT_FAILURE",
+                      "EXIT_SUCCESS",
+                      "RAND_MAX",
+                      "MB_CUR_MAX",
+                      "M_E",
+                      "M_LOG2E",
+                      "M_LOG10E",
+                      "M_LN2",
+                      "M_LN10",
+                      "M_PI",
+                      "M_PI_2",
+                      "M_PI_4",
+                      "M_1_PI",
+                      "M_2_PI",
+                      "M_2_SQRTPI",
+                      "M_SQRT2",
+                      "M_SQRT1_2",
+                      "MAXFLOAT",
+                      "HUGE_VAL",
+                      "HUGE_VALF",
+                      "HUGE_VALL",
+                      "INFINITY",
+                      "NAN",
+                      "return",
+                      "char",
+                      "int",
+                      "float",
+                      "double",
+                      "FILE",
+                      "void",
+                      "break",
+                      "continue"};
+    int i;
+    for(i = 0; i < 47; i++) {
+        if(!strcmp(s, tab[i])) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+int isFollowedByRightOps(char c) {
+    char tab[12] = {'=', '+', '-', '/', '*', ',', ')', '<', '>', '[', ']', ';'};
+    int i;
+    for(i = 0; i < 12; i++) {
+        if(c == tab[i]) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+int isADir(char *p) {
+    int i;
+    int temp = 0;
+    char *ret;
+    for(i = 0; i < strlen(p); i++) {
+        if(p[i] == '\\' || p[i] == '/') {
+            temp = i;
+        }
+    }
+    temp += temp != 0 ? 1 : 0;
+    ret = malloc(sizeof(char) * (strlen(p) - temp + 1));
+    strncpy(ret, p + temp, strlen(p) - temp);
+    ret[strlen(ret)] = '\0';
+
+    for(i = 0; i < strlen(ret); i++) {
+        if(ret[i] == '.') {
+            free(ret);
+            return 0;
+        }
+    }
+
+    free(ret);
+    return 1;
+}
+
+void getFuncAndVariables(FILE *f, FuncTab *prototypes, FuncTab *declaredFunc, VarTab *declaredVar, calledStuff *calledFunc, calledStuff *usedVars) {
+    char *buffer = malloc(sizeof(char) * 10);
+    char *name = malloc(sizeof(char) * 50);
+    long startParams = 0;
+    int nameWrite = 0;
+    char c;
+    int line = 1;
+    int countBraces = 0;
+    int i; //DEBUG
+    while((c = fgetc(f)) != EOF) {
+        printf("Ligne %d\n", line);
+        if(c == '#') {
+            goThroughLine(f, &line, &countBraces);
+            continue;
+        }
+        if(c == ' ') {
+            goThroughSpaces(f);
+            continue;
+        }
+        if(c == '/') {
+            if((c = fgetc(f)) == '/') {
+                goThroughLine(f, &line, &countBraces);
+                continue;
+            } else if(c == '*') {
+                goThroughComment(f, &line);
+            }
+        }
+        if(c == '\n') {
+            line++;
+            continue;
+        }
+        /*if(line % 30 == 0) {
+            system("pause");
+        }*/
+        if(c == '}') {
+            if(countBraces == 1) {
+                declaredFunc->tab[declaredFunc->size - 1]->endLine = line;
+                printf("FIN DE LA FONCTION ATTENTIOOOOOOOOOOOON %d\n", declaredFunc->tab[declaredFunc->size - 1]->endLine);
+            }
+            countBraces--;
+            continue;
+        }
+        if(((c >= 'a' && c <= 'z') || c == 'F') && (startWithType(f, buffer))) {
+            printf("It does start with type !\n");
+            c = fgetc(f);
+            if((c < 'a' || c > 'z') && (c < 'A' || c > 'Z') && c != '_') {
+                goThroughLine(f, &line, &countBraces);
+                continue;
+            } else {
+                fseek(f, -1, SEEK_CUR);
+            }
+            nameWrite = 0;
+            while(isValidChar(c = fgetc(f))) {
+                name[nameWrite++] = c;
+            }
+            name[nameWrite] = '\0';
+            fseek(f, -1, SEEK_CUR);
+            goThroughSpaces(f);
+            c = fgetc(f);
+            if(c == '(') {
+                printf("[!]");
+                startParams = ftell(f);
+                goThroughParams(f);
+            } else if(c == '=' || c == ';'){
+                if(countBraces != 0 && declaredFunc->size > 0) {
+                    printf("%s %s at line %d, in %s\n", buffer, name, line, declaredFunc->tab[(declaredFunc->size) - 1]->name);
+                    addVariable(declaredVar, buffer, name, declaredFunc->tab[(declaredFunc->size) - 1], line);
+                } else {
+                    addVariable(declaredVar, buffer, name, NULL, line);
+                }
+                printf("%s %s is a variable, line %d\n", buffer, name, line);
+                goThroughLine(f, &line, &countBraces);
+                nameWrite = 0;
+                continue;
+            } else {
+                nameWrite = 0;
+                continue;
+            }
+            goThroughSpaces(f);
+            if((c = fgetc(f)) == '{') {
+                printf("%d : this is a function !\n", line);
+                addFunction(declaredFunc, buffer, name, line, 0);
+                getParams(f, startParams, declaredFunc->tab[(declaredFunc->size) - 1], declaredVar, line);
+                //countBraces++;
+                //goThroughSpaces(f);
+            } else if(c == ';') {
+                printf("%d : this is a prototype !\n", line);
+                addFunction(prototypes, buffer, name, line, -1);
+            }
+        } else {
+            analyzeLine(f, line, &countBraces, declaredFunc, calledFunc, usedVars);
+            line++;
+        }
+    }
+
+    system("pause");
+    system("cls");
+    for(i = 0; i < calledFunc->size; i++) {
+        printf("La fonction %s est appelee ligne %d\n", calledFunc->name[i], calledFunc->line[i]);
+    }
+
+    system("pause");
+    system("cls");
+
+    for(i = 0; i < usedVars->size; i++) {
+        printf("La variable %s est utilisee ligne %d\n", usedVars->name[i], usedVars->line[i]);
+    }
+
+    free(name);
+    free(buffer);
+}
+
+int startWithType(FILE *f, char *type) {
+    char c;
+    int write;
+    int count = 1;
+    int isType = 0;
+    fseek(f, -1, SEEK_CUR);
+    c = fgetc(f);
+    switch(c) {
+        case 'i' :
+            if((c = fgetc(f)) == 'n') {
+                count++;
+                if((c = fgetc(f)) == 't') {
+                    strcpy(type, "int");
+                    write = 3;
+                    goThroughSpaces(f);
+                    while((c = fgetc(f)) == '*') {
+                        type[write++] = '*';
+                    }
+                    type[write] = '\0';
+                    count = 1;
+                    isType = 1;
+                }
+            }
+            fseek(f, -count, SEEK_CUR);
+            break;
+        case 'c' :
+            if((c = fgetc(f)) == 'h') {
+                count++;
+                if((c = fgetc(f)) == 'a') {
+                    count++;
+                    if((c = fgetc(f)) == 'r') {
+                        strcpy(type, "char");
+                        write = 4;
+                        goThroughSpaces(f);
+                        while((c = fgetc(f)) == '*') {
+                            type[write++] = '*';
+                        }
+                        type[write] = '\0';
+                        count = 1;
+                        isType = 1;
+                    }
+                }
+            }
+            fseek(f, -count, SEEK_CUR);
+            break;
+        case 'F' :
+            if((c = fgetc(f)) == 'I') {
+                count++;
+                if((c = fgetc(f)) == 'L') {
+                    count++;
+                    if((c = fgetc(f)) == 'E') {
+                        strcpy(type, "FILE");
+                        write = 4;
+                        goThroughSpaces(f);
+                        while((c = fgetc(f)) == '*') {
+                            type[write++] = '*';
+                        }
+                        type[write] = '\0';
+                        count = 1;
+                        isType = 1;
+                    }
+                }
+            }
+            fseek(f, -count, SEEK_CUR);
+            break;
+        case 'v' :
+            if((c = fgetc(f)) == 'o') {
+                count++;
+                if((c = fgetc(f)) == 'i') {
+                    count++;
+                    if((c = fgetc(f)) == 'd') {
+                        strcpy(type, "void");
+                        write = 4;
+                        goThroughSpaces(f);
+                        while((c = fgetc(f)) == '*') {
+                            type[write++] = '*';
+                        }
+                        type[write] = '\0';
+                        count = 1;
+                        isType = 1;
+                    }
+                }
+            }
+            fseek(f, -count, SEEK_CUR);
+            break;
+        case 'f' :
+            if((c = fgetc(f)) == 'l') {
+                count++;
+                if((c = fgetc(f)) == 'o') {
+                    count++;
+                    if((c = fgetc(f)) == 'a') {
+                        count++;
+                        if((c = fgetc(f)) == 't') {
+                            strcpy(type, "float");
+                            write = 5;
+                            goThroughSpaces(f);
+                            while((c = fgetc(f)) == '*') {
+                                type[write++] = '*';
+                            }
+                            type[write] = '\0';
+                            count = 1;
+                            isType = 1;
+                        }
+                    }
+                }
+            }
+            fseek(f, -count, SEEK_CUR);
+            break;
+        case 'd' :
+            if((c = fgetc(f)) == 'o') {
+                count++;
+                if((c = fgetc(f)) == 'u') {
+                    count++;
+                    if((c = fgetc(f)) == 'b') {
+                        count++;
+                        if((c = fgetc(f)) == 'l') {
+                            count++;
+                            if((c = fgetc(f)) == 'e') {
+                                strcpy(type, "double");
+                                write = 6;
+                                goThroughSpaces(f);
+                                while((c = fgetc(f)) == '*') {
+                                    type[write++] = '*';
+                                }
+                                type[write] = '\0';
+                                count = 1;
+                                isType = 1;
+                            }
+                        }
+                    }
+                }
+            }
+            fseek(f, -count, SEEK_CUR);
+            break;
+    }
+    //goThroughSpaces(f);
+    return isType;
+}
+
+void goThroughSpaces(FILE *f) {
+    char c;
+    while((c = fgetc(f)) == ' '){}
+    fseek(f, -1, SEEK_CUR);
+}
+
+int isValidChar(char c) {
+    if((c >= 'a' && c <= 'z') ||
+       (c >= 'A' && c <= 'Z') ||
+       (c >= '0' && c <= '9') ||
+       (c == '_')) {
+        return 1;
+       }
+    return 0;
+}
+
+void goThroughParams(FILE *f) {
+    char c;
+    int countParentheses = 1;
+    while(countParentheses){
+        c = fgetc(f);
+        if(c == '"') {
+            goThroughStrings(f);
+        }
+        if(c == '(') {
+            countParentheses++;
+        }
+        if(c == ')') {
+            countParentheses--;
+        }
+    }
+}
+
+void goThroughStrings(FILE *f) {
+    char c;
+    int countQuote = 1;
+    while(countQuote) {
+        c = fgetc(f);
+        if(c == '\\') {
+            fseek(f, 1, SEEK_CUR);
+            continue;
+        }
+        if(c == '"') {
+            countQuote--;
+        }
+    }
+}
+
+void goThroughLine(FILE* f, int *line, int *countBraces) {
+    char c;
+    while((c = fgetc(f)) != '\n') {
+        if(c == '{') {
+            *countBraces += 1;
+        } else if(c == '}') {
+            *countBraces -= 1;
+            if(*countBraces == 0) {
+                printf("Fin de la fonction ligne %d\n", *line);
+            }
+        }
+    }
+    *line += 1;
+}
+
+void goThroughComment(FILE *f, int *line) {
+    char c;
+    int out = 1;
+    while(out) {
+        c = fgetc(f);
+        if(c == '*') {
+            if((c = fgetc(f)) == '/') {
+                out = 0;
+            } else {
+                fseek(f, -1, SEEK_CUR);
+            }
+        } else if(c == '\n') {
+            *line += 1;
+        }
+    }
+}
+
+void getParams(FILE *f, long start, Functions *func, VarTab *declaredVar, int line) {
+    char c;
+    char *type = malloc(sizeof(char) * 10);
+    char *name;
+    int write = 0;
+    rewind(f);
+    fseek(f, start, SEEK_CUR);
+    goThroughSpaces(f);
+    printf("GetParams\n");
+
+    // Si pas de paramètres, on arrête de parcourir la fonction
+    if((c = fgetc(f)) == ')') {
+        return;
+    }
+    rewind(f);
+    fseek(f, start - 1, SEEK_CUR); // start-1 pour être bien positioné dans la boucle qui suit
+    name = malloc(sizeof(char) * 100);
+
+    while((c = fgetc(f)) != ')') {
+        if(!startWithType(f, type)) {
+            type = getUnknownType(f);
+        }
+        c = fgetc(f);
+        if((c < 'a' || c > 'z') && (c < 'A' || c > 'Z') && c != '_') {
+            do {
+                c = fgetc(f);
+            } while(c != ',' && c != ')');
+            if(goToNextParam(f)) {
+                fseek(f, -1, SEEK_CUR); // On se positionne pour la prochaine occurence de la boucle
+                continue;
+            } else {
+                break;
+            }
+        }
+        name[write++] = c;
+        while(isValidChar(c = fgetc(f))) {
+            name[write++] = c;
+        }
+        name[write] = '\0';
+        addVariable(declaredVar, type, name, func, line);
+        write = 0;
+        //printf("\n--- Ceci est un parametre : ------\ntype %s nom %s\n\n", type, name); // DEBUG
+        if(c == ',') {
+            continue;
+        } else if(c == ')') {
+            break;
+        }
+        if(goToNextParam(f)) {
+            fseek(f, -1, SEEK_CUR);
+            continue;
+        } else {
+            break;
+        }
+    }
+    free(name);
+    free(type);
+}
+
+int goToNextParam(FILE *f) {
+    char c;
+    do {
+        c = fgetc(f);
+        if(c == '"') {
+            goThroughStrings(f);
+        }
+    } while(c != ',' && c != ')');
+    if(c == ')') {
+        return 0;
+    } else {
+        return 1;
+    }
+}
+
+char *getUnknownType(FILE *f) {
+    char *res = malloc(sizeof(char) * 50);
+    char c;
+    int write = 0;
+    while(isValidChar(c = fgetc(f))) {
+        res[write++] = c;
+    }
+    if(c == '*') {
+        res[write++] = '*';
+    }
+    goThroughSpaces(f);
+    while((c = fgetc(f)) == '*') {
+        res[write++] = '*';
+    }
+    res[write] = '\0';
+    fseek(f, -1, SEEK_CUR);
+    goThroughSpaces(f);
+    return res;
+}
+
+void analyzeLine(FILE *f, int line, int *countBraces, FuncTab *declaredFunc, calledStuff *calledFunc, calledStuff *usedVars) {
+    printf("---analyzeLine\n");
+    char c;
+    char *buffer = malloc(sizeof(char) * 30);
+    int write = 0;
+    fseek(f, -1, SEEK_CUR);
+    while((c = fgetc(f)) != '\n') {
+        if(isValidChar(c)) {
+            write = 0;
+            buffer[write++] = c;
+            while(isValidChar(c = fgetc(f))) {
+                buffer[write++] = c;
+            }
+            // Gère les structures. On considère ici qu'une structure est utilisée peu importe quel variable qui la contient est utilisée
+            if(c == '-') {
+                if((c = fgetc(f)) == '>') {
+                    while(isValidChar(c = fgetc(f))){}
+                }
+            } else if(c == '.') {
+                while(isValidChar(c = fgetc(f))){}
+            }
+            buffer[write] = '\0';
+            if(c == ' ') {
+                goThroughSpaces(f);
+                c = fgetc(f);
+            }
+            if(c == '(') {
+                printf("[%d] %s should be a function\n", line, buffer);
+                if(!isAnIncludedFunc(buffer)) {
+                    if(!isJustANumber(buffer)) {
+                        if(!isAnInstruction(buffer)) {
+                            addCalledStuff(calledFunc, buffer, line);
+                            printf("This is a call of %s\n", buffer);
+                        }
+                    }
+                } else {
+                    printf("Fonction dans un include, pas la peine de mettre d'erreur\n"); //DEBUG
+                }
+            } else if(isFollowedByRightOps(c)) {
+                if(!isJustANumber(buffer)) {
+                    if(!isAConstant(buffer)) {
+                        addCalledStuff(usedVars, buffer, line);
+                    }
+                }
+                printf("[%d] %s should be a variable\n", line, buffer);
+            } else if(c == '{') {
+                *countBraces += 1;
+            } else if(c == '}') {
+                *countBraces -= 1;
+                if(*countBraces == 0) {
+                    declaredFunc->tab[declaredFunc->size - 1]->endLine = line;
+                }
+            } else if((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
+                fseek(f, -1, SEEK_CUR);
+            }
+        } else if(c == '"') {
+            goThroughStrings(f);
+        } else if(c == '\n') {
+            break;
+        } else if(c == '{') {
+            *countBraces += 1;
+        } else if(c == '}') {
+            *countBraces -= 1;
+            if(*countBraces == 0) {
+                printf("FIN DE LA FONCTION OUAIS OUAIS LIGNE %d", line); // CHANGE
+            }
+        }
+    }
+    free(buffer);
+    printf("--- end analyzeLine\n");
+}
+
+void no_prototype(FuncTab *prototypes, FuncTab *declaredFunc) {
+    int i;
+    int j;
+    int hasPrototype;
+    for(i = 0; i < declaredFunc->size; i++) {
+        hasPrototype = 0;
+        for(j = 0; j < prototypes->size; j++) {
+            if(isAPrototypeOf(declaredFunc->tab[i], prototypes->tab[j])) {
+                if(declaredFunc->tab[i]->startLine > prototypes->tab[j]->startLine) {
+                    hasPrototype = 1;
+                } else {
+                    hasPrototype = 2;
+                }
+                break;
+            }
+        }
+        if(!hasPrototype) {
+            printf("Ligne %d : the function %s %s has no prototype\n",
+                   declaredFunc->tab[i]->startLine, declaredFunc->tab[i]->type, declaredFunc->tab[i]->name);
+        } else if(hasPrototype == 2) {
+            printf("Ligne %d : the function %s %s has a prototype but is declared after the function\n",
+                   declaredFunc->tab[i]->startLine, declaredFunc->tab[i]->type, declaredFunc->tab[i]->name);
+        }
+    }
+}
+
+int isAPrototypeOf(Functions *funcOne, Functions *funcTwo) {
+    if(!strcmp(funcOne->name, funcTwo->name)) {
+        if(!strcmp(funcOne->type, funcTwo->type)) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+void unused_function(FuncTab *declaredFunc, calledStuff *calledFunc) {
+    int i;
+    int j;
+    int isDeclared;
+    for(i = 0; i < declaredFunc->size; i++) {
+        isDeclared = 0;
+        for(j = 0; j < calledFunc->size; j++) {
+            if(!strcmp(declaredFunc->tab[i]->name, calledFunc->name[j])) {
+                isDeclared = 1;
+                break;
+            }
+        }
+        if(!isDeclared) {
+            printf("Line %d : function %s declared but not used", declaredFunc->tab[i]->startLine, declaredFunc->tab[i]->name);
+        }
+    }
+}
+
+void undeclared_function(FuncTab *declaredFunc, calledStuff *calledFunc) {
+    int i;
+    int j;
+    int isUsed;
+    for(i = 0; i < calledFunc->size; i++) {
+        isUsed = 0;
+        for(j = 0; j < declaredFunc->size; j++) {
+            if(!strcmp(calledFunc->name[i], declaredFunc->tab[j]->name)) {
+                isUsed = 1;
+                break;
+            }
+        }
+        if(!isUsed) {
+            printf("Line %d : function %s is used but not declared\n", calledFunc->line[i], calledFunc->name[i]);
+        }
+    }
+}
+
+void unused_variable(VarTab *declaredVar, calledStuff *usedVars) {
+    int i;
+    int j;
+    int isUsed;
+    for(i = 0; i < declaredVar->size; i++) {
+        isUsed = 0;
+        if(declaredVar->tab[i]->declaredIn == NULL) {
+            for(j = 0; j < usedVars->size; j++) {
+                if(!strcmp(declaredVar->tab[i]->name, usedVars->name[j])) {
+                    if(declaredVar->tab[i]->declaredLine < usedVars->line[j]) {
+                        isUsed = 1;
+                        break;
+                    }
+                }
+            }
+        } else {
+            for(j = 0; j < usedVars->size; j++) {
+                if(!isInFunc(declaredVar->tab[i]->declaredIn, usedVars->line[j])) {
+                    continue;
+                }
+                if(!strcmp(declaredVar->tab[i]->name, usedVars->name[j])) {
+                    if(declaredVar->tab[i]->declaredLine < usedVars->line[j]) {
+                        isUsed = 1;
+                        break;
+                    }
+                }
+            }
+        }
+        if(!isUsed) {
+            printf("Line %d : variable %s is instancied but not used\n", declaredVar->tab[i]->declaredLine, declaredVar->tab[i]->name);
+        }
+    }
+}
+
+int isInFunc(Functions *f, int line) {
+    if(line >= f->startLine && line <= f->endLine) {
+        return 1;
+    }
+    return 0;
+}
+
+void undeclared_variable(VarTab *declaredVar, calledStuff *usedVars) {
+    int i;
+    int j;
+    int isDeclared;
+    for(i = 0; i < usedVars->size; i++) {
+        isDeclared = 0;
+        for(j = 0; j < declaredVar->size; j++) {
+            if(!strcmp(usedVars->name[i], declaredVar->tab[j]->name)) {
+                if(declaredVar->tab[j]->declaredIn == NULL) {
+                    if(usedVars->line[i] > declaredVar->tab[j]->declaredLine) {
+                        isDeclared = 1;
+                        break;
+                    }
+                } else {
+                    if(!isInFunc(declaredVar->tab[j]->declaredIn, usedVars->line[i])) {
+                        continue;
+                    } else {
+                        if(usedVars->line[i] > declaredVar->tab[j]->declaredLine) {
+                            isDeclared = 1;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        if(!isDeclared) {
+            printf("Line %d : variable %s is used but not declared\n", usedVars->line[i], usedVars->name[i]);
+        }
+    }
 }

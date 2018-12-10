@@ -41,6 +41,9 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="struct.h" />
+		<Unit filename="structFunctions.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Extensions>
 			<code_completion />
 			<envvars />
