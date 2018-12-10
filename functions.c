@@ -948,29 +948,38 @@ void operatorsSpacing(char* filename){
             isQuote(&c, f);
             isSharp(&c, f, &lines);
             lines += isLine(&c);
+            //Verifie si le char rencontré est un operateur
             for(i = 0; i < 11; i++){
                 if(c == operators[i]){
                     if(operators[i] == '&' || operators[i] == '*'){
+                        //ajoute le cas de pointeur en exception
                         pointeur = 1;
                     }
                     fseek(f, -2, SEEK_CUR);
                     c = fgetc(f);
+                    //Verifie si le char precedent l'operateur est un espace sinon stock l'information
                     if(c != ' '){
                         pbmBefore = 1;
                     }
                     c = fgetc(f);
                     c = fgetc(f);
+                    //Verifie si le char apres l'operateur est un espace
                     if(c != ' '){
+                        // ou un egal
                         if(c != '='){
+                            //ou si c'est un cas d'incrementation ++ ou --
                             if((c == operators[i]) && i < 2){
                                 c = fgetc(f);
+                                // Mais il faut qu'il y ait forcement un ; apres sinon erreur
                                 if(c == ';'){
+                                    //Si c'est le cas affiche pas d'erreur s'il n'y a pas eu d'espace avant et/ou apres
                                     pbmAfter = 0;
                                     pbmBefore = 0;
                                 } else {
                                     pbmAfter = 1;
                                 }
                             } else if((c == operators[i]) && i > 1){
+                                //Verifie si le char et le meme operateur que le char precedant
                                 c = fgetc(f);
                                 if(c != ' '){
                                     pbmAfter = 1;
@@ -1013,6 +1022,7 @@ void trailingSpaces(char* filename){
             isComment(&c, f, &lines);
             isQuote(&c, f);
             lines += isLine(&c);
+            //Verifie s'il y a un espace avant un retour a la ligne, si oui erreur sinon ok
             if(c == ' '){
                 c = fgetc(f);
                 if(c == '\n'){
@@ -1034,10 +1044,9 @@ void maxLineNumbers(char* filename, int* n){
     int charMax = *n;
     if(f != NULL){
         while((c = fgetc(f)) != EOF ){
-            /*isComment(&c, f, &lines);
-            isQuote(&c, f);*/
             lines += isLine(&c);
             if(c == '\n'){
+                //Verifie le nombre de char avant un retour a la ligne et test s'il est pas superieur au nombre indiqué
                 if(charCounter > charMax){
                     printf("\Erreur de la regle maxLineNumbers a la ligne %d\n", lines);
                 }
@@ -1072,10 +1081,13 @@ void checkIndent(int* n, char* filename){
             isQuote(&c, f);
             lines += isLine(&c);
             charNbr +=1;
+            //Si c'est un { on verifie si il y en a eu un de recontré avant deja
             if(c == '{' && wentBack == 0){
                 if(isChanged > 0){
+                    //Si un { a été rencontré avant on augmente l'indentation de n fois
                     newN += m;
                 }
+                //sinon c'est que c'est le premier est dans ce cas on revient en arriere pour verifier son nombre d'espace
                 fseek(f, -charNbr, SEEK_CUR);
                 isChanged += 1;
                 charNbr = 0;
@@ -1103,6 +1115,7 @@ void checkIndent(int* n, char* filename){
                     c = fgetc(f);
                     newSpaceCounter +=1;
                 }
+                //Verifie si le nombre d'espace rencontré
                 if(c == '}' && (newSpaceCounter != (spaceCounter + newN - 1 - m))){
                     printf("Erreur d'indentation a la ligne : %d", lines);
                 } else if((newSpaceCounter != (spaceCounter + newN - 1)) && isChanged > 0 && c != '}'){
