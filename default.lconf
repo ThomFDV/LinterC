@@ -2,10 +2,14 @@
 main.lconf
 
 =rules
-- array-bracket-eol : off
-- operator-spacing : off
+- array-bracket-eol : on
+- operators-spacing : on
 - comma-spacing : on
 - max-file-line-numbers : 4
+- indent : 4
+- comments-header : on
+- max-line-numbers : 15
+- no-trailing-spaces : on
 
 =excludedFiles
 - bonjour.c

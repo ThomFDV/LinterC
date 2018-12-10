@@ -502,9 +502,21 @@ void exec_rules(StringTabs *rules, StringTabs *analyzedFiles) {
 
                         case 3  : // 3  indent
                             n = recup_number_of_rule(7, rules->tab[i]);
+                            if (n > -1) {
+                                checkIndent(analyzedFiles->tab[k], n);
+                            }
+                            else {
+                                printf(" --- Valeur saisie non valide\n");
+                            }
                             break;
                         case 5  : // 5  max-line-numbers
                             n = recup_number_of_rule(17, rules->tab[i]);
+                            if (n > -1) {
+                                maxLineNumbers(analyzedFiles->tab[k], n);
+                            }
+                            else {
+                                printf(" --- Valeur saisie non valide\n");
+                            }
                             break;
                         case 6  : // 6  max-file-line-numbers
 
@@ -536,7 +548,7 @@ void exec_rules(StringTabs *rules, StringTabs *analyzedFiles) {
                         case 1  : // 1  operators-spacing
                             isValid = recup_value_of_rule(18, rules->tab[i]);
                             if (isValid > -1) {
-                                // regle
+                                operatorsSpacing(analyzedFiles->tab[k]);
                             }
                             else {
                                 printf(" --- Valeur saisie non valide\n");
@@ -563,7 +575,7 @@ void exec_rules(StringTabs *rules, StringTabs *analyzedFiles) {
                         case 7  : // 7  no-trailing-spaces
                             isValid = recup_value_of_rule(19, rules->tab[i]);
                             if (isValid > -1) {
-                                // regle
+                                trailingSpaces(analyzedFiles->tab[k]);
                             }
                             else {
                                 printf(" --- Valeur saisie non valide\n");
@@ -653,6 +665,41 @@ void exec_rules(StringTabs *rules, StringTabs *analyzedFiles) {
         }
         system("pause");
         system("cls");
+    }
+}
+
+void isComment(char* c, FILE* f, int* lines){
+    if(*c == '/'){
+        *c = fgetc(f);
+        if(*c == '/'){
+            while(*c != '\n'){
+                *c = fgetc(f);
+            }
+        } else if(*c == '*'){
+            do{
+                *c = fgetc(f);
+                *lines += isLine(c);
+            } while((*c != '*') && ((*c = fgetc(f)) != '/'));
+            *c = fgetc(f);
+            *c = fgetc(f);
+            *lines += isLine(c);
+        }
+    }
+}
+
+void isQuote(char* c, FILE* f){
+    if(*c == '"'){
+        do{
+            *c = fgetc(f);
+        } while(*c != '"');
+    }
+}
+
+int isLine(char* c){
+    if (*c == '\n') {
+        return 1;
+    } else{
+        return 0;
     }
 }
 
@@ -877,6 +924,198 @@ void max_file_line_numbers(char *analyzedFiles, int maxLineNumber) {
                 printf(" %d\n",  maxLineNumber);
                 break;
             }
+        }
+    }
+    fclose(f);
+}
+
+void operatorsSpacing(char* filename){
+    FILE* f = fopen(filename,"r");
+    char c;
+    int i;
+    int lines = 1;
+    char operators[11] = {'+', '-', '/', '*', '%', '!', '^', '<', '>', '|', '&'};
+    int pbmBefore;
+    int pbmAfter;
+    int pointeur;
+    pointeur = 0;
+    pbmAfter = 0;
+    pbmBefore = 0;
+    if(f != NULL){
+        while((c = fgetc(f)) != EOF ){
+            isComment(&c, f, &lines);
+            isQuote(&c, f);
+            lines += isLine(&c);
+            for(i = 0; i < 11; i++){
+                if(c == operators[i]){
+                    if(operators[i] == '&' || operators[i] == '*'){
+                        pointeur = 1;
+                    }
+                    fseek(f, -2, SEEK_CUR);
+                    c = fgetc(f);
+                    if(c != ' '){
+                        pbmBefore = 1;
+                    }
+                    c = fgetc(f);
+                    c = fgetc(f);
+                    if(c != ' '){
+                        if(c != '='){
+                            if((c == operators[i]) && i < 2){
+                                c = fgetc(f);
+                                if(c == ';'){
+                                    pbmAfter = 0;
+                                    pbmBefore = 0;
+                                } else {
+                                    pbmAfter = 1;
+                                }
+                            } else if((c == operators[i]) && i > 1){
+                                c = fgetc(f);
+                                if(c != ' '){
+                                    pbmAfter = 1;
+                                } else {
+                                    pbmAfter = 0;
+                                }
+                            } else if(pointeur == 1){
+                                pbmAfter = 0;
+                            } else {
+                                pbmAfter = 1;
+                            }
+                        } else {
+                            c = fgetc(f);
+                            if(c != ' '){
+                                pbmAfter = 1;
+                            }
+                        }
+                    }
+                }
+                if(pbmBefore == 1){
+                    printf("\n---Erreur de la regle operator-spacing a la ligne : %d", lines);
+                } else if(pbmAfter == 1){
+                    printf("\n---Erreur de la regle operator-spacing a la ligne : %d", lines);
+                }
+                pbmBefore = 0;
+                pbmAfter = 0;
+            }
+        }
+    }
+    fclose(f);
+}
+
+void trailingSpaces(char* filename){
+    FILE* f = fopen(filename,"r+");
+    char c;
+    int lines = 1;
+    if(f != NULL){
+        while((c = fgetc(f)) != EOF ){
+            isComment(&c, f, &lines);
+            isQuote(&c, f);
+            lines += isLine(&c);
+            if(c == ' '){
+                c = fgetc(f);
+                if(c == '\n'){
+                    printf("Erreur de la regle no-trailing-spaces a la ligne %d\n", lines);
+                }
+                fseek(f, -1, SEEK_CUR);
+            }
+        }
+    }
+    fclose(f);
+}
+
+void maxLineNumbers(char* filename, int* n){
+    FILE* f = fopen(filename,"r+");
+    char c;
+    int lines = 0;
+    int charCounter;
+    charCounter = 0;
+    int charMax = n;
+    if(f != NULL){
+        while((c = fgetc(f)) != EOF ){
+            isComment(&c, f, &lines);
+            isQuote(&c, f);
+            lines += isLine(&c);
+            if(c == '\n'){
+                if(charCounter > charMax){
+                    printf("\Erreur de la regle maxLineNumbers a la ligne %d\n", lines);
+                }
+                charCounter = 0;
+            } else {
+                charCounter += 1;
+            }
+        }
+    }
+    fclose(f);
+}
+
+void checkIndent(int* n, char* filename){
+    FILE* f = fopen(filename,"r");
+    char c;
+    int i;
+    int m;
+    int newN;
+    int lines = 1;
+    int charNbr = 0;
+    int spaceNbr = 0;
+    int spaceCounter = 1;
+    int isChanged = 0;
+    int spaceBefore = 0;
+    int newSpaceCounter = 0;
+    int wentBack = 0;
+    newN = n;
+    m = n;
+
+    if(f != NULL){
+        while((c = fgetc(f)) != EOF ){
+            isComment(&c, f, &lines);
+            isQuote(&c, f);
+            lines += isLine(&c);
+            charNbr +=1;
+            if(c == '{' && wentBack == 0){
+                if(isChanged > 0){
+                    newN += m;
+                }
+                fseek(f, -charNbr, SEEK_CUR);
+                isChanged += 1;
+                charNbr = 0;
+                wentBack = 1;
+            }
+            if(c == ' ' && isChanged > 0){
+                if(c == ' ' && spaceBefore == 1){
+                    spaceCounter +=1;
+                } else{
+                    spaceBefore = 1;
+                }
+            } else{
+                spaceNbr = spaceCounter;
+                spaceCounter = 1;
+                spaceBefore = 0;
+            }
+
+            if(c == '\n'){
+                charNbr = 0;
+            }
+            if(c == '\n' && isChanged > 0){
+                c = fgetc(f);
+                wentBack = 0;
+                while(c == ' '){
+                    c = fgetc(f);
+                    newSpaceCounter +=1;
+                }
+                if(c == '}' && (newSpaceCounter != (spaceCounter + newN - 1 - m))){
+                    printf("Erreur d'indentation a la ligne : %d", lines);
+                } else if((newSpaceCounter != (spaceCounter + newN - 1)) && isChanged > 0 && c != '}'){
+                    printf("Erreur d'indentation a la ligne : %d", lines);
+                }
+                spaceBefore = 0;
+                newSpaceCounter = 0;
+
+            }
+            if(c == '}'){
+                newN -= m;
+                isChanged -= 1;
+            }
+
+
         }
     }
     fclose(f);

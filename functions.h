@@ -74,6 +74,15 @@ int recup_value_of_rule(int, char*);
 // Execute les regles si elles sont "on" ou si "n" > 0
 void exec_rules(StringTabs*, StringTabs*);
 
+// Avance le curseur de 1 si un commentaire est rencontré
+void isComment(char* c, FILE* f, int* lines);
+
+// Avance le curseur de 1 si des guillemets sont rencontrés
+void isQuote(char* c, FILE* f);
+
+// Retourne 1 si un saut a la ligne est rencontré
+int isLine(char* c);
+
 /* ************************************************************************************************************************* */
 /*                                                          RULES                                                            */
 /* ************************************************************************************************************************* */
@@ -89,4 +98,16 @@ void comments_header(char*);
 
 // Les fichiers ne doivent pas dépasser n lignes.
 void max_file_line_numbers(char*, int);
+
+// Vérifie si l'indentation est correcte
+void checkIndent(int* n, char* filename);
+
+// Vérifie si le nombre de char est bien respecté
+void maxLineNumbers(char* filename, int* n);
+
+// Vérifie s'il n'y a pas d'espaces inutiles
+void trailingSpaces(char* filename);
+
+// Vérifie s'il y a bien un espace entre chaque opérateurs
+void operatorsSpacing(char* filename);
 

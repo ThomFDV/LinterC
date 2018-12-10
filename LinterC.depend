@@ -116,3 +116,35 @@
 1543307365 c:\users\e2854663\documents\c_ecole\langage c\linterc\parcours.h
 	<stdio.h>
 
+1544379758 source:c:\users\thomfdv\desktop\langage-c\linterc-master\main.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<windows.h>
+	"functions.h"
+	"parcours.h"
+
+1544438282 c:\users\thomfdv\desktop\langage-c\linterc-master\functions.h
+	<stdio.h>
+	"struct.h"
+
+1544379758 c:\users\thomfdv\desktop\langage-c\linterc-master\struct.h
+	<stdio.h>
+
+1544379758 c:\users\thomfdv\desktop\langage-c\linterc-master\parcours.h
+	<stdio.h>
+
+1544447769 source:c:\users\thomfdv\desktop\langage-c\linterc-master\functions.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<windows.h>
+	<dirent.h>
+	<sys/types.h>
+	<errno.h>
+	"functions.h"
+
+1544438282 source:c:\users\thomfdv\desktop\langage-c\linterc-master\functions.h
+	<stdio.h>
+	"struct.h"
+
